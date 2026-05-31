@@ -90,5 +90,33 @@ document.getElementById("output").innerHTML = `
 
 </table>
 `;
+let products = [
+{
+id:1,
+name:"Laptop",
+price:50000
+},
+{
+id:2,
+name:"Mouse",
+price:500
+}
+];
 
+function addProduct(){
+
+let name =
+document.getElementById("productName").value;
+
+let price =
+document.getElementById("productPrice").value;
+
+products.push({
+id:products.length+1,
+name:name,
+price:price
+});
+
+alert("Product Added Successfully");
+}
 }
