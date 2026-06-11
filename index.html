@@ -1,48 +1,263 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Inventory Management System</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100 font-sans text-gray-800">
 
-<body>
+    <div class="flex h-screen">
+        <div class="w-64 bg-slate-900 text-white p-6 space-y-6">
+            <h1 class="text-xl font-bold tracking-wider">📦 IMS Dashboard</h1>
+            <nav class="space-y-2">
+                <button onclick="switchTab('products')" class="w-full text-left py-2 px-4 rounded hover:bg-slate-700 transition">Manage Products</button>
+                <button onclick="switchTab('transactions')" class="w-full text-left py-2 px-4 rounded hover:bg-slate-700 transition">New Purchase / Sale</button>
+                <button onclick="switchTab('reports')" class="w-full text-left py-2 px-4 rounded hover:bg-slate-700 transition">Assignment Queries</button>
+                <button onclick="switchTab('procedures')" class="w-full text-left py-2 px-4 rounded hover:bg-slate-700 transition">Procedures & Reports</button>
+            </nav>
+        </div>
 
-<h1>Inventory Management System</h1>
+        <div class="flex-1 p-10 overflow-y-auto">
+            <div id="feedback" class="hidden mb-4 p-4 rounded text-white font-medium"></div>
 
-<div class="cards">
-    <div class="card">
-        <h2>Products</h2>
-        <p>4 Products Available</p>
+            <section id="tab-products" class="tab-content space-y-6">
+                <div class="flex justify-between items-center bg-white p-6 rounded shadow-sm">
+                    <h2 class="text-2xl font-bold">Product Catalog CRUD Operations</h2>
+                    <form id="productForm" class="flex gap-3 items-end">
+                        <input type="hidden" id="prodId">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">NAME</label>
+                            <input type="text" id="prodName" required class="border p-2 rounded w-44">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">CATEGORY</label>
+                            <input type="text" id="prodCat" required class="border p-2 rounded w-36">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">PRICE ($)</label>
+                            <input type="number" step="0.01" id="prodPrice" required class="border p-2 rounded w-24">
+                        </div>
+                        <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 font-medium">Save Record</button>
+                    </form>
+                </div>
+
+                <div class="bg-white rounded shadow overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-200">
+                            <tr>
+                                <th class="p-4 border-b">ID</th>
+                                <th class="p-4 border-b">Product Name</th>
+                                <th class="p-4 border-b">Category</th>
+                                <th class="p-4 border-b">Price</th>
+                                <th class="p-4 border-b text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="tab-transactions" class="tab-content hidden grid grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded shadow space-y-4">
+                    <h3 class="text-xl font-bold text-green-700">Log Product Purchase (Triggers Stock Increase)</h3>
+                    <form id="purchaseForm" class="space-y-3">
+                        <input type="number" placeholder="Supplier ID" id="purSupId" required class="w-full border p-2 rounded">
+                        <input type="number" placeholder="Product ID" id="purProdId" required class="w-full border p-2 rounded">
+                        <input type="number" placeholder="Quantity" id="purQty" required class="w-full border p-2 rounded">
+                        <input type="date" id="purDate" required class="w-full border p-2 rounded">
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded font-bold">Process Purchase</button>
+                    </form>
+                </div>
+
+                <div class="bg-white p-6 rounded shadow space-y-4">
+                    <h3 class="text-xl font-bold text-amber-700">Process Sale Order (Triggers Validation Check)</h3>
+                    <form id="saleForm" class="space-y-3">
+                        <input type="number" placeholder="Product ID" id="saleProdId" required class="w-full border p-2 rounded">
+                        <input type="number" placeholder="Quantity" id="saleQty" required class="w-full border p-2 rounded">
+                        <input type="number" step="0.01" placeholder="Selling Price" id="salePrice" required class="w-full border p-2 rounded">
+                        <input type="date" id="saleDate" required class="w-full border p-2 rounded">
+                        <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white p-2 rounded font-bold">Submit Transaction</button>
+                    </form>
+                </div>
+            </section>
+
+            <section id="tab-reports" class="tab-content hidden space-y-6">
+                <div class="bg-white p-6 rounded shadow">
+                    <h3 class="text-xl font-bold mb-4">Run Assignment Criteria Selectors</h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="runAssignmentQuery('q3')" class="bg-slate-700 text-white px-3 py-1.5 rounded text-sm hover:bg-slate-800">Q3: 2-Table Inner Join</button>
+                        <button onclick="runAssignmentQuery('q4')" class="bg-slate-700 text-white px-3 py-1.5 rounded text-sm hover:bg-slate-800">Q4: 3-Table Join</button>
+                        <button onclick="runAssignmentQuery('q5')" class="bg-slate-700 text-white px-3 py-1.5 rounded text-sm hover:bg-slate-800">Q5: Group By Warehouse</button>
+                        <button onclick="runAssignmentQuery('q6')" class="bg-slate-700 text-white px-3 py-1.5 rounded text-sm hover:bg-slate-800">Q6: Having > 1000 units</button>
+                        <button onclick="runAssignmentQuery('q7')" class="bg-slate-700 text-white px-3 py-1.5 rounded text-sm hover:bg-slate-800">Q7: Subquery Pricing Check</button>
+                        <button onclick="runAssignmentQuery('q9')" class="bg-slate-700 text-white px-3 py-1.5 rounded text-sm hover:bg-slate-800">Q9: Left Join (All Sales)</button>
+                        <button onclick="runAssignmentQuery('q10')" class="bg-slate-700 text-white px-3 py-1.5 rounded text-sm hover:bg-slate-800">Q10: Not Exists (Never Sold)</button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded shadow p-6">
+                    <h4 class="font-bold text-lg mb-2 text-gray-700">Query Dataset Return Output</h4>
+                    <pre id="queryOutput" class="bg-slate-900 text-green-400 p-4 rounded overflow-x-auto text-xs min-h-[200px]">Select an assignment filter query view criteria from the list above...</pre>
+                </div>
+            </section>
+
+            <section id="tab-procedures" class="tab-content hidden grid grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded shadow space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">Stored Procedure 1: Full Stock Ledger</h3>
+                        <button onclick="callProcedure('stock-report')" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded">Execute</button>
+                    </div>
+                    <pre id="procStockOutput" class="bg-gray-900 text-white text-xs p-3 rounded h-64 overflow-y-auto">[]</pre>
+                </div>
+
+                <div class="bg-white p-6 rounded shadow space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">Stored Procedure 2: Low-Stock Reorder Flags</h3>
+                        <button onclick="callProcedure('reorder-check')" class="bg-red-600 text-white text-xs px-3 py-1.5 rounded">Run Threshold Evaluation</button>
+                    </div>
+                    <pre id="procReorderOutput" class="bg-gray-900 text-white text-xs p-3 rounded h-64 overflow-y-auto">[]</pre>
+                </div>
+            </section>
+        </div>
     </div>
 
-    <div class="card">
-        <h2>Suppliers</h2>
-        <p>3 Suppliers Registered</p>
-    </div>
+    <script>
+        const API = 'http://localhost:5000/api';
 
-    <div class="card">
-        <h2>Warehouses</h2>
-        <p>3 Warehouses</p>
-    </div>
-</div>
+        function showMessage(msg, isError = false) {
+            const el = document.getElementById('feedback');
+            el.innerText = msg;
+            el.className = `p-4 rounded text-white font-medium mb-4 ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+            el.classList.remove('hidden');
+            setTimeout(() => el.classList.add('hidden'), 5000);
+        }
 
-<div class="buttons">
-    <button onclick="showProducts()">Products</button>
-    <button onclick="showSuppliers()">Suppliers</button>
-    <button onclick="showWarehouse()">Warehouse</button>
-</div>
-<h2>Add Product</h2>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            if(tabId === 'products') loadProducts();
+        }
 
-<input type="text" id="productName" placeholder="Product Name">
+        // --- PRODUCT OPERATIONS ---
+        async function loadProducts() {
+            try {
+                const res = await fetch(`${API}/products`);
+                const data = await res.json();
+                const tbody = document.getElementById('productTableBody');
+                tbody.innerHTML = data.map(p => `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-4">${p.product_id}</td>
+                        <td class="p-4 font-semibold">${p.name}</td>
+                        <td class="p-4 text-gray-600">${p.category}</td>
+                        <td class="p-4 font-mono">$${parseFloat(p.price).toFixed(2)}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="editProduct(${p.product_id}, '${p.name}', '${p.category}', ${p.price})" class="text-blue-600 hover:underline text-sm font-medium">Edit</button>
+                            <button onclick="deleteProduct(${p.product_id})" class="text-red-600 hover:underline text-sm font-medium">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(err) {
+                showMessage('Could not connect to the backend server. Make sure it is running on port 5000.', true);
+            }
+        }
 
-<input type="number" id="productPrice" placeholder="Price">
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('prodId').value;
+            const payload = {
+                name: document.getElementById('prodName').value,
+                category: document.getElementById('prodCat').value,
+                price: document.getElementById('prodPrice').value
+            };
 
-<button onclick="addProduct()">
-Add Product
-</button>
-<div id="output"></div>
+            const url = id ? `${API}/products/${id}` : `${API}/products`;
+            const method = id ? 'PUT' : 'POST';
 
-<script src="script.js"></script>
+            await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
+            document.getElementById('productForm').reset();
+            document.getElementById('prodId').value = '';
+            showMessage('Product table updated successfully.');
+            loadProducts();
+        });
+
+        function editProduct(id, name, cat, price) {
+            document.getElementById('prodId').value = id;
+            document.getElementById('prodName').value = name;
+            document.getElementById('prodCat').value = cat;
+            document.getElementById('prodPrice').value = price;
+        }
+
+        async function deleteProduct(id) {
+            if(confirm('Are you sure you want to delete this product?')) {
+                await fetch(`${API}/products/${id}`, { method: 'DELETE' });
+                showMessage('Product deleted.');
+                loadProducts();
+            }
+        }
+
+        // --- INVENTORY TRANSACTION HANDLING ---
+        document.getElementById('purchaseForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                supplier_id: document.getElementById('purSupId').value,
+                product_id: document.getElementById('purProdId').value,
+                quantity: document.getElementById('purQty').value,
+                purchase_date: document.getElementById('purDate').value
+            };
+            const res = await fetch(`${API}/purchases`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if(result.error) showMessage(result.error, true);
+            else { showMessage('Purchase added! Stock increased via Database Trigger.'); document.getElementById('purchaseForm').reset(); }
+        });
+
+        document.getElementById('saleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const data = {
+                product_id: document.getElementById('saleProdId').value,
+                quantity: document.getElementById('saleQty').value,
+                selling_price: document.getElementById('salePrice').value,
+                sales_date: document.getElementById('saleDate').value
+            };
+            const res = await fetch(`${API}/sales`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if(result.error) {
+                showMessage(`Trigger Warning: ${result.error}`, true);
+            } else {
+                showMessage('Sale successful! Stock deducted via Database Trigger.');
+                document.getElementById('saleForm').reset();
+            }
+        });
+
+        // --- QUERY & PROCEDURE EXECUTION ---
+        async function runAssignmentQuery(route) {
+            const res = await fetch(`${API}/queries/${route}`);
+            const data = await res.json();
+            document.getElementById('queryOutput').innerText = JSON.stringify(data, null, 4);
+        }
+
+        async function callProcedure(procRoute) {
+            const res = await fetch(`${API}/procedures/${procRoute}`);
+            const data = await res.json();
+            const elementId = procRoute === 'stock-report' ? 'procStockOutput' : 'procReorderOutput';
+            document.getElementById(elementId).innerText = JSON.stringify(data, null, 4);
+        }
+
+        loadProducts();
+    </script>
 </body>
 </html>
