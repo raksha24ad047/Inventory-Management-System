@@ -23,13 +23,18 @@ function addProduct() {
 }
 
 function addStock() {
-    let newStock = { id: Date.now(), qty: parseInt(document.getElementById('sQty').value) };
-    db.stocks.push(newStock);
+   const qty = parseInt(document.getElementById('sQty').value);
+    const pName = document.getElementById('pName').value; // Ensure you have this input
     
-    // Trigger fires here
-    checkReorderTrigger(newStock);
-    
+    // 1. Add to database
+    db.stocks.push({ name: pName, qty: qty });
     save();
+    
+    // 2. Fire the Trigger
+    checkReorderTrigger(qty, pName);
+    
+    // 3. Refresh display
+    render();
 }
 // 1. IMPROVED REPORT (Displays directly on page)
 function generateStockReport() {
@@ -46,9 +51,18 @@ function generateStockReport() {
 
 // 2. TRIGGER (Display in a UI toast/banner instead of alert)
 function checkReorderTrigger(stock) {
-    if (stock.qty < 10) {
-        const notify = document.getElementById('notificationArea');
-        notify.innerHTML = `<p style="color:red; font-weight:bold;">⚠️ Alert: Stock for ${stock.id} is low!</p>`;
+    const notify = document.getElementById('notificationArea');
+    
+    // The "Trigger" condition
+    if (qty < 10) {
+        // Update the dashboard UI instead of using alert()
+        notify.innerHTML = `
+            <div style="background-color: #ffe6e6; border: 1px solid red; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                <strong>⚠️ REORDER TRIGGER:</strong> Stock for "${productName}" is low (${qty} units). Please reorder!
+            </div>`;
+    } else {
+        // Clear the alert if stock is sufficient
+        notify.innerHTML = ''; 
     }
 }
 
