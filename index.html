@@ -1,210 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventory Management Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+<body>
+    <h1>Inventory Management System</h1>
+    
+    <div id="app">
+        <section>
+            <h2>Products</h2>
+            <input id="pName" placeholder="Name">
+            <input id="pPrice" placeholder="Price">
+            <button onclick="addProduct()">Add Product</button>
+            <table id="productTable"><thead><tr><th>Name</th><th>Price</th><th>Action</th></tr></thead><tbody id="pBody"></tbody></table>
+        </section>
 
-    <div class="flex h-screen overflow-hidden">
-        
-        <aside class="w-64 bg-slate-900 text-slate-200 flex flex-col justify-between hidden md:flex">
-            <div class="p-6">
-                <div class="flex items-center space-x-3 mb-8">
-                    <div class="bg-blue-600 p-2 rounded-lg text-white">
-                        <i class="fa-solid fa-boxes-stacked text-xl"></i>
-                    </div>
-                    <span class="text-xl font-bold tracking-wide text-white">StockMaster</span>
-                </div>
-                <nav class="space-y-1">
-                    <button onclick="switchTab('products')" id="btn-products" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-600 text-white font-medium transition">
-                        <i class="fa-solid fa-box"></i>
-                        <span>Product Catalog</span>
-                    </button>
-                    <button onclick="switchTab('transactions')" id="btn-transactions" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 font-medium transition">
-                        <i class="fa-solid fa-right-left"></i>
-                        <span>Transactions</span>
-                    </button>
-                    <button onclick="switchTab('analytics')" id="btn-analytics" class="tab-btn w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-slate-200 font-medium transition">
-                        <i class="fa-solid fa-chart-pie"></i>
-                        <span>Stored Procedures</span>
-                    </button>
-                </nav>
-            </div>
-            <div class="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-                Inventory System v2.0
-            </div>
-        </aside>
-
-        <main class="flex-1 flex flex-col overflow-y-auto">
-            
-            <header class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-10">
-                <h1 id="page-title" class="text-2xl font-bold text-slate-900">Product Catalog</h1>
-                <div id="toast-container" class="transition-all duration-300 transform translate-y-0 opacity-100">
-                    <div id="feedback" class="hidden px-4 py-2 rounded-lg text-sm font-semibold shadow-sm flex items-center space-x-2"></div>
-                </div>
-            </header>
-
-            <div class="p-8 space-y-8 max-w-7xl w-full mx-auto">
-                
-                <section id="tab-products" class="tab-content space-y-6">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h2 id="form-heading" class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <i class="fa-solid fa-circle-plus text-blue-600"></i> Add New Product
-                        </h2>
-                        <form id="productForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                            <input type="hidden" id="prodId">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Product Name</label>
-                                <input type="text" id="prodName" required placeholder="e.g., Gaming Mouse" class="w-full border border-slate-200 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 transition">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Category</label>
-                                <input type="text" id="prodCat" required placeholder="e.g., Electronics" class="w-full border border-slate-200 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 transition">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Price ($)</label>
-                                <input type="number" step="0.01" id="prodPrice" required placeholder="0.00" class="w-full border border-slate-200 p-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 transition">
-                            </div>
-                            <div class="flex gap-2">
-                                <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm transition flex justify-center items-center gap-2">
-                                    <i class="fa-solid fa-floppy-disk"></i> Save Record
-                                </button>
-                                <button type="button" id="cancelBtn" onclick="resetForm()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold py-2.5 px-4 rounded-lg transition">
-                                    Cancel
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                            <h3 class="font-bold text-slate-800">Live Database Records</h3>
-                            <span class="bg-blue-50 text-blue-700 text-xs px-2.5 py-1 rounded-full font-semibold border border-blue-100" id="record-count">0 Products</span>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-100/70 border-b border-slate-200 text-slate-600 text-xs font-semibold uppercase tracking-wider">
-                                        <th class="p-4 pl-6 w-20">ID</th>
-                                        <th class="p-4">Product Name</th>
-                                        <th class="p-4">Category</th>
-                                        <th class="p-4">Price</th>
-                                        <th class="p-4 pr-6 text-center w-40">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="productTableBody" class="divide-y divide-slate-100 text-sm">
-                                    </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="tab-transactions" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="flex items-center space-x-3 border-b border-slate-100 pb-3">
-                            <div class="bg-emerald-50 text-emerald-600 p-2 rounded-lg"><i class="fa-solid fa-cart-shopping text-lg"></i></div>
-                            <div>
-                                <h3 class="font-bold text-slate-900">Log Product Purchase</h3>
-                                <p class="text-xs text-slate-400">Triggers automated stock increase</p>
-                            </div>
-                        </div>
-                        <form id="purchaseForm" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Supplier ID</label>
-                                <input type="number" id="purSupId" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Product ID</label>
-                                <input type="number" id="purProdId" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Quantity</label>
-                                <input type="number" id="purQty" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Purchase Date</label>
-                                <input type="date" id="purDate" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg transition shadow-sm">
-                                Process Purchase
-                            </button>
-                        </form>
-                    </div>
-
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="flex items-center space-x-3 border-b border-slate-100 pb-3">
-                            <div class="bg-amber-50 text-amber-600 p-2 rounded-lg"><i class="fa-solid fa-hand-holding-dollar text-lg"></i></div>
-                            <div>
-                                <h3 class="font-bold text-slate-900">Process Sale Order</h3>
-                                <p class="text-xs text-slate-400">Triggers validation check & auto-deduction</p>
-                            </div>
-                        </div>
-                        <form id="saleForm" class="space-y-4">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Product ID</label>
-                                <input type="number" id="saleProdId" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Quantity</label>
-                                <input type="number" id="saleQty" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Selling Price ($)</label>
-                                <input type="number" step="0.01" id="salePrice" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 mb-1">Sales Date</label>
-                                <input type="date" id="saleDate" required class="w-full border border-slate-200 p-2 rounded-lg bg-slate-50">
-                            </div>
-                            <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 rounded-lg transition shadow-sm">
-                                Submit Transaction
-                            </button>
-                        </form>
-                    </div>
-                </section>
-
-                <section id="tab-analytics" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h3 class="font-bold text-slate-900 mb-3">Database Custom Criteria Views</h3>
-                        <div class="flex flex-wrap gap-2">
-                            <button onclick="runCustomQuery('q3')" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-slate-700 transition">Q3: 2-Table Join</button>
-                            <button onclick="runCustomQuery('q4')" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-slate-700 transition">Q4: 3-Table Join</button>
-                            <button onclick="runCustomQuery('q5')" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-slate-700 transition">Q5: Group By</button>
-                            <button onclick="runCustomQuery('q6')" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-slate-700 transition">Q6: Having Filters</button>
-                            <button onclick="runCustomQuery('q7')" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-slate-700 transition">Q7: Subqueries</button>
-                            <button onclick="runCustomQuery('q9')" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-slate-700 transition">Q9: Left Join</button>
-                            <button onclick="runCustomQuery('q10')" class="bg-slate-800 text-white text-xs font-semibold px-3 py-2 rounded-lg hover:bg-slate-700 transition">Q10: Not Exists</button>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-slate-800">SP 1: GetStockReport()</h3>
-                                <button onclick="executeProcedure('stock-report')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Execute SP</button>
-                            </div>
-                            <pre id="procStockOutput" class="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-lg h-60 overflow-y-auto shadow-inner">Click "Execute SP" to view compiled inventory report records...</pre>
-                        </div>
-                        
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
-                            <div class="flex justify-between items-center">
-                                <h3 class="font-bold text-slate-800">SP 2: CheckReorderRequirement()</h3>
-                                <button onclick="executeProcedure('reorder-check')" class="bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Run Thresholds</button>
-                            </div>
-                            <pre id="procReorderOutput" class="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-lg h-60 overflow-y-auto shadow-inner">Click "Run Thresholds" to view sub-safety level notices...</pre>
-                        </div>
-                    </div>
-                </section>
-
-            </div>
-        </main>
+        <section>
+            <h2>Stock Management (Trigger Simulation)</h2>
+            <input id="sQty" type="number" placeholder="Stock Quantity">
+            <button onclick="addStock()">Add Stock</button>
+            <button onclick="generateStockReport()">Generate Stock Report (Stored Proc)</button>
+        </section>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
